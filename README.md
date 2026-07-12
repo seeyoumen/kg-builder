@@ -3,12 +3,31 @@
 A small, hands-on project for **understanding knowledge graphs**. You paste (or
 pick) a paragraph of text; Claude extracts the entities and relationships; you
 see the exact **Cypher** that would write them; you click **Insert**; and the
-**live Neo4j graph** on the right updates in real time.
+**live Neo4j graph** on the right updates in real time. You can also **ask the
+graph questions in plain English** and watch the matching part light up.
 
-```
-text  ──▶  Claude (Agent SDK)  ──▶  { nodes, relationships }  ──▶  Cypher  ──▶  Neo4j
-                                                                         │
-                                          browser graph  ◀── WebSocket ──┘
+## Screenshots
+
+**Build** — paste text, extract entities and relationships, preview the Cypher, insert, and watch the live graph fill in:
+
+![Build tab and live graph](docs/build.png)
+
+**Ask** — ask in plain English; Claude writes a read-only Cypher query, the matching subgraph lights up (everything else dims), and you get a grounded summary:
+
+![Ask tab with a highlighted query result](docs/ask.png)
+
+## Architecture
+
+```mermaid
+flowchart LR
+  T["Unstructured text"] -->|"Claude Agent SDK"| E["Entities + relationships"]
+  E --> R["Entity resolution<br/>(link to existing nodes)"]
+  R --> C["Cypher MERGE"]
+  C --> DB[("Neo4j")]
+  DB -->|"WebSocket"| V["Live graph (vis-network)"]
+  Q["NL question"] -->|"Claude: NL to Cypher"| CY["Read-only Cypher"]
+  CY --> DB
+  DB --> H["Highlight matches<br/>+ Claude summary"]
 ```
 
 ## How it works (the pieces)
@@ -45,6 +64,8 @@ The **🔍 Ask** tab turns a plain-English question into a query:
 2. **Run & highlight**: the query runs against Neo4j; the matching nodes/relationships **light up in the graph** (everything else dims) and the view zooms to them.
 3. **Answer**: Claude summarizes the returned subgraph in plain English, grounded only in the results.
 
+A **Match type** selector controls the query strategy: **Auto** (Claude decides), **Direct** (one exact relationship), **Broad** (all related relationship types), or **Path** (variable-length shortest paths for indirect, multi-hop connections).
+
 Safety: generated/edited queries pass a **read-only guard** (single statement; no `CREATE/MERGE/SET/DELETE/CALL/LOAD`) before execution, so the Ask tab can never mutate the graph.
 
 ## Prerequisites (to run after cloning)
@@ -56,7 +77,7 @@ Safety: generated/edited queries pass a **read-only guard** (single statement; n
 ## Run it (from a fresh clone)
 
 ```bash
-git clone <this-repo-url> kg-builder
+git clone https://github.com/JayJajoo/kg-builder.git
 cd kg-builder
 
 # 1. install dependencies
@@ -125,7 +146,7 @@ $env:KG_MODEL = "claude-sonnet-5"          # PowerShell
 | `PORT` | `3100` | Web server port |
 | `NEO4J_URI` | `bolt://localhost:7687` | Neo4j bolt endpoint |
 | `NEO4J_USER` / `NEO4J_PASSWORD` | `neo4j` / `kgdemo123` | Neo4j credentials |
-| `KG_MODEL` | `claude-opus-4-8` | Model used for extraction |
+| `KG_MODEL` | `claude-opus-4-8` | Model used for extraction and querying |
 
 ## Teardown
 
