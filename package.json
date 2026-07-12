@@ -1,0 +1,22 @@
+{
+  "name": "kg-builder",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive knowledge-graph builder: unstructured text -> Claude (Agent SDK) extraction -> Cypher -> Neo4j, with a live graph visualization.",
+  "scripts": {
+    "db:up": "docker run -d --name kg-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/kgdemo123 -v kg-neo4j-data:/data neo4j:5",
+    "db:start": "docker start kg-neo4j",
+    "db:stop": "docker stop kg-neo4j",
+    "db:rm": "docker rm -f kg-neo4j",
+    "db:logs": "docker logs -f kg-neo4j",
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "latest",
+    "express": "^4.21.2",
+    "neo4j-driver": "^5.28.1",
+    "ws": "^8.18.0"
+  }
+}

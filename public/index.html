@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KG Builder — text → knowledge graph</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>Knowledge Graph Builder</h1>
+      <div class="conn" id="conn">connecting…</div>
+    </header>
+
+    <main>
+      <!-- LEFT: the pipeline -->
+      <section class="panel left">
+        <div class="tabs">
+          <button id="tab-btn-build" class="tab active">🔨 Build</button>
+          <button id="tab-btn-ask" class="tab">🔍 Ask</button>
+        </div>
+        <div id="tab-build">
+        <!-- Source text -->
+        <div class="card">
+          <div class="card-head">
+            <span class="badge">1</span>
+            <h2>Source text</h2>
+            <button id="btn-next" class="ghost" title="Load another sample">↻ next sample</button>
+          </div>
+          <div class="sample-hint" id="sample-hint"></div>
+          <textarea id="text" rows="6" spellcheck="false"></textarea>
+          <button id="btn-extract" class="primary">Extract with Claude →</button>
+        </div>
+
+        <!-- Extraction -->
+        <div class="card" id="card-extract" hidden>
+          <div class="card-head">
+            <span class="badge">2</span>
+            <h2>Extracted structure</h2>
+          </div>
+          <div class="cols">
+            <div>
+              <h3>Entities <span id="node-count" class="count"></span></h3>
+              <ul id="nodes" class="chips"></ul>
+            </div>
+            <div>
+              <h3>Relationships <span id="rel-count" class="count"></span></h3>
+              <ul id="rels" class="rels"></ul>
+            </div>
+          </div>
+          <div id="links-wrap" hidden>
+            <h3>🔗 Linked to existing graph <span id="link-count" class="count"></span></h3>
+            <ul id="links" class="links"></ul>
+          </div>
+          <button id="btn-preview" class="primary">Preview Cypher →</button>
+        </div>
+
+        <!-- Cypher -->
+        <div class="card" id="card-cypher" hidden>
+          <div class="card-head">
+            <span class="badge">3</span>
+            <h2>Cypher to insert</h2>
+          </div>
+          <pre id="cypher"></pre>
+          <button id="btn-insert" class="primary">Insert into Neo4j ✓</button>
+        </div>
+        </div><!-- /tab-build -->
+
+        <div id="tab-ask" hidden>
+          <div class="card">
+            <div class="card-head">
+              <span class="badge">1</span>
+              <h2>Ask the graph</h2>
+            </div>
+            <textarea id="question" rows="2" spellcheck="false" placeholder="e.g. Who won the Nobel Prize in Physics?"></textarea>
+            <div class="examples" id="q-examples"></div>
+            <div class="mode-row">
+              <label for="match-mode">Match type</label>
+              <select id="match-mode" title="How the question is turned into a query">
+                <option value="auto">Auto — let Claude decide</option>
+                <option value="direct">Direct — exact relationship only</option>
+                <option value="broad">Broad — include related relationships</option>
+                <option value="path">Path — find indirect connections</option>
+              </select>
+            </div>
+            <button id="btn-gen-cypher" class="primary">Generate Cypher →</button>
+          </div>
+
+          <div class="card" id="card-query-cypher" hidden>
+            <div class="card-head">
+              <span class="badge">2</span>
+              <h2>Cypher (editable)</h2>
+            </div>
+            <textarea id="query-cypher" rows="5" spellcheck="false"></textarea>
+            <button id="btn-run-query" class="primary">Run &amp; highlight ✓</button>
+          </div>
+
+          <div class="card" id="card-results" hidden>
+            <div class="card-head">
+              <span class="badge">3</span>
+              <h2>Answer</h2>
+              <button id="btn-clear-hl" class="ghost">clear highlight</button>
+            </div>
+            <div id="answer" class="answer"></div>
+            <h3>Matched <span id="match-count" class="count"></span></h3>
+            <ul id="results" class="rels"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: the live graph -->
+      <section class="panel right">
+        <div class="graph-head">
+          <h2>Live database graph</h2>
+          <div class="graph-actions">
+            <span id="graph-stats" class="count"></span>
+            <div class="zoombar">
+              <button id="zoom-out" class="ghost sq" title="Zoom out">−</button>
+              <button id="zoom-in" class="ghost sq" title="Zoom in">+</button>
+              <button id="zoom-fit" class="ghost" title="Fit graph to view">⤢ fit</button>
+              <button id="btn-physics" class="ghost" title="Freeze / resume the layout so you can arrange nodes freely">❄ freeze</button>
+            </div>
+            <button id="btn-clear" class="ghost danger">clear graph</button>
+          </div>
+        </div>
+        <div id="graph"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+    <script src="app.js"></script>
+  </body>
+</html>
