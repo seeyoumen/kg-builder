@@ -1,17 +1,1 @@
-# dependencies
-node_modules/
-
-# logs
-*.log
-npm-debug.log*
-
-# env / secrets (never commit API keys)
-.env
-.env.*
-!.env.example
-
-# OS / editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+(public/index.html and public/app.js are source files, no build artifacts, dependencies, or temp files in the changes)
