@@ -20,29 +20,29 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 
 const MODEL = process.env.KG_MODEL || "claude-opus-4-8";
 
-const SYSTEM_PROMPT = `You are an information-extraction engine that turns prose into a knowledge graph.
-Extract the entities (nodes) and the relationships between them.
+const SYSTEM_PROMPT = `你是一个知识图谱信息提取引擎，将文本转换为知识图谱。
+提取实体（节点）和它们之间的关系。
 
-Respond with ONLY a single JSON object — no prose, no explanation, no markdown code fences.
+仅返回一个 JSON 对象——不要任何散文、解释或 markdown 代码框。
 
-The JSON must have this exact shape:
+JSON 必须具有以下确切结构：
 {
   "nodes": [
-    { "id": "<lowercase_snake_slug>", "label": "<EntityType>", "name": "<Display Name>", "properties": { } }
+    { "id": "<小写蛇形命名>", "label": "<实体类型>", "name": "<显示名称>", "properties": { } }
   ],
   "relationships": [
-    { "from": "<node id>", "to": "<node id>", "type": "<UPPER_SNAKE_TYPE>", "properties": { } }
+    { "from": "<节点 id>", "to": "<节点 id>", "type": "<关系类型>", "properties": { } }
   ]
 }
 
-Rules:
-- "id" is a slug derived from the name, e.g. "marie_curie". Use it consistently in relationships.
-- "label" is the entity TYPE, capitalized: Person, Organization, Place, Product, Award, Element, Work, Event, Field, etc.
-- "name" is the readable name, e.g. "Marie Curie".
-- Put attributes (years, dates, roles, numbers) inside "properties" as primitive values, never nested objects.
-- "type" is an UPPER_SNAKE_CASE verb phrase, e.g. BORN_IN, FOUNDED, DISCOVERED, WON, WORKED_AT, MARRIED_TO, CREATED, PART_OF.
-- Every id used in a relationship must also appear as a node.
-- Return valid JSON only.`;
+规则：
+- "id" 是从名称派生的标识符，例如 "marie_curie" 或 "ju_liren"。在关系中一致使用它。
+- "label" 是实体类型，使用中文：人物、组织、地点、产品、奖项、元素、作品、事件、领域等。
+- "name" 是可读名称，例如 "玛丽·居里" 或 "爱因斯坦"。
+- 将属性（年份、日期、角色、数字）放在 "properties" 中作为原始值，不要嵌套对象。
+- "type" 是中文关系描述，例如：出生于、创立、发现、获得、工作于、结婚、创作、属于等。
+- 关系中使用的每个 id 也必须作为节点出现。
+- 只返回有效的 JSON。`;
 
 export async function extractGraph(text) {
   const prompt =

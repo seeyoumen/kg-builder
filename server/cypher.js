@@ -15,22 +15,26 @@
 // --- identifier / value sanitizers -----------------------------------------
 
 // A Neo4j label: letters, digits, underscores; must not start with a digit.
+// 支持中文标签，允许中文字符
 export function sanitizeLabel(label) {
+  // 保留原始标签（包括中文），只做基本清理
   const cleaned = String(label || "")
-    .replace(/[^A-Za-z0-9_]/g, "_")
+    .replace(/[^\u4e00-\u9fa5A-Za-z0-9_]/g, "_")
     .replace(/^(\d)/, "_$1");
-  return cleaned || "Entity";
+  return cleaned || "实体";
 }
 
-// A relationship type, normalized to UPPER_SNAKE_CASE.
+// A relationship type, can be Chinese text.
+// 关系类型可以是中文
 export function sanitizeRelType(type) {
+  // 保留原始的关系类型（包括中文），只做基本清理
   const cleaned = String(type || "")
     .trim()
-    .replace(/[^A-Za-z0-9_]/g, "_")
+    .replace(/[\u4e00-\u9fa5A-Za-z0-9_]/g, (c) => c) // 保留中文、字母、数字、下划线
+    .replace(/[^ \u4e00-\u9fa5A-Za-z0-9_]/g, "_")
     .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .toUpperCase();
-  return cleaned || "RELATED_TO";
+    .replace(/^_+|_+$/g, "");
+  return cleaned || "相关";
 }
 
 // A property key. Wrap in backticks only if it isn't a plain identifier.
