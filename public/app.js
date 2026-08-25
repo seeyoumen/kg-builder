@@ -127,7 +127,7 @@ $("tab-btn-ask").addEventListener("click", () => setTab("ask"));
 const EXAMPLE_QUESTIONS = [
   "谁获得了诺贝尔物理学奖？",
   "居里夫人发现了什么？",
-  "显示与 Apple Inc. 相关的所有内容",
+  "显示与苹果公司相关的所有内容",
   "谁创立了苹果？",
 ];
 $("q-examples").innerHTML = EXAMPLE_QUESTIONS.map((q) => `<button class="ex" type="button">${esc(q)}</button>`).join("");
