@@ -1,70 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KG Builder — text → knowledge graph</title>
+    <title>知识图谱构建器 — 文本 → 知识图谱</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="styles.css" />
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   </head>
   <body>
     <header>
-      <h1>Knowledge Graph Builder</h1>
-      <div class="conn" id="conn">connecting…</div>
+      <h1>知识图谱构建器</h1>
+      <div class="conn" id="conn">连接中…</div>
     </header>
 
     <main>
       <!-- LEFT: the pipeline -->
       <section class="panel left">
         <div class="tabs">
-          <button id="tab-btn-build" class="tab active">🔨 Build</button>
-          <button id="tab-btn-ask" class="tab">🔍 Ask</button>
+          <button id="tab-btn-build" class="tab active">🔨 构建</button>
+          <button id="tab-btn-ask" class="tab">🔍 查询</button>
         </div>
         <div id="tab-build">
         <!-- Source text -->
         <div class="card">
           <div class="card-head">
             <span class="badge">1</span>
-            <h2>Source text</h2>
-            <button id="btn-next" class="ghost" title="Load another sample">↻ next sample</button>
+            <h2>源文本</h2>
+            <button id="btn-next" class="ghost" title="加载另一个示例">↻ 下一个示例</button>
           </div>
           <div class="sample-hint" id="sample-hint"></div>
           <textarea id="text" rows="6" spellcheck="false"></textarea>
-          <button id="btn-extract" class="primary">Extract with Claude →</button>
+          <button id="btn-extract" class="primary">使用 Claude 提取 →</button>
         </div>
 
         <!-- Extraction -->
         <div class="card" id="card-extract" hidden>
           <div class="card-head">
             <span class="badge">2</span>
-            <h2>Extracted structure</h2>
+            <h2>提取结果</h2>
           </div>
           <div class="cols">
             <div>
-              <h3>Entities <span id="node-count" class="count"></span></h3>
+              <h3>实体 <span id="node-count" class="count"></span></h3>
               <ul id="nodes" class="chips"></ul>
             </div>
             <div>
-              <h3>Relationships <span id="rel-count" class="count"></span></h3>
+              <h3>关系 <span id="rel-count" class="count"></span></h3>
               <ul id="rels" class="rels"></ul>
             </div>
           </div>
           <div id="links-wrap" hidden>
-            <h3>🔗 Linked to existing graph <span id="link-count" class="count"></span></h3>
+            <h3>🔗 已链接到现有图谱 <span id="link-count" class="count"></span></h3>
             <ul id="links" class="links"></ul>
           </div>
-          <button id="btn-preview" class="primary">Preview Cypher →</button>
+          <button id="btn-preview" class="primary">预览 Cypher →</button>
         </div>
 
         <!-- Cypher -->
         <div class="card" id="card-cypher" hidden>
           <div class="card-head">
             <span class="badge">3</span>
-            <h2>Cypher to insert</h2>
+            <h2>待插入的 Cypher</h2>
           </div>
           <pre id="cypher"></pre>
-          <button id="btn-insert" class="primary">Insert into Neo4j ✓</button>
+          <button id="btn-insert" class="primary">插入到 Neo4j ✓</button>
         </div>
         </div><!-- /tab-build -->
 
@@ -72,39 +72,39 @@
           <div class="card">
             <div class="card-head">
               <span class="badge">1</span>
-              <h2>Ask the graph</h2>
+              <h2>查询图谱</h2>
             </div>
-            <textarea id="question" rows="2" spellcheck="false" placeholder="e.g. Who won the Nobel Prize in Physics?"></textarea>
+            <textarea id="question" rows="2" spellcheck="false" placeholder="例如：谁获得了诺贝尔物理学奖？"></textarea>
             <div class="examples" id="q-examples"></div>
             <div class="mode-row">
-              <label for="match-mode">Match type</label>
-              <select id="match-mode" title="How the question is turned into a query">
-                <option value="auto">Auto — let Claude decide</option>
-                <option value="direct">Direct — exact relationship only</option>
-                <option value="broad">Broad — include related relationships</option>
-                <option value="path">Path — find indirect connections</option>
+              <label for="match-mode">匹配模式</label>
+              <select id="match-mode" title="问题如何转换为查询">
+                <option value="auto">自动 — 让 Claude 决定</option>
+                <option value="direct">直接 — 仅精确关系</option>
+                <option value="broad">广泛 — 包含相关关系</option>
+                <option value="path">路径 — 查找间接连接</option>
               </select>
             </div>
-            <button id="btn-gen-cypher" class="primary">Generate Cypher →</button>
+            <button id="btn-gen-cypher" class="primary">生成 Cypher →</button>
           </div>
 
           <div class="card" id="card-query-cypher" hidden>
             <div class="card-head">
               <span class="badge">2</span>
-              <h2>Cypher (editable)</h2>
+              <h2>Cypher（可编辑）</h2>
             </div>
             <textarea id="query-cypher" rows="5" spellcheck="false"></textarea>
-            <button id="btn-run-query" class="primary">Run &amp; highlight ✓</button>
+            <button id="btn-run-query" class="primary">运行并高亮 ✓</button>
           </div>
 
           <div class="card" id="card-results" hidden>
             <div class="card-head">
               <span class="badge">3</span>
-              <h2>Answer</h2>
-              <button id="btn-clear-hl" class="ghost">clear highlight</button>
+              <h2>答案</h2>
+              <button id="btn-clear-hl" class="ghost">清除高亮</button>
             </div>
             <div id="answer" class="answer"></div>
-            <h3>Matched <span id="match-count" class="count"></span></h3>
+            <h3>匹配结果 <span id="match-count" class="count"></span></h3>
             <ul id="results" class="rels"></ul>
           </div>
         </div>
@@ -113,16 +113,16 @@
       <!-- RIGHT: the live graph -->
       <section class="panel right">
         <div class="graph-head">
-          <h2>Live database graph</h2>
+          <h2>实时数据库图谱</h2>
           <div class="graph-actions">
             <span id="graph-stats" class="count"></span>
             <div class="zoombar">
-              <button id="zoom-out" class="ghost sq" title="Zoom out">−</button>
-              <button id="zoom-in" class="ghost sq" title="Zoom in">+</button>
-              <button id="zoom-fit" class="ghost" title="Fit graph to view">⤢ fit</button>
-              <button id="btn-physics" class="ghost" title="Freeze / resume the layout so you can arrange nodes freely">❄ freeze</button>
+              <button id="zoom-out" class="ghost sq" title="缩小">−</button>
+              <button id="zoom-in" class="ghost sq" title="放大">+</button>
+              <button id="zoom-fit" class="ghost" title="适应视图">⤢ 适应</button>
+              <button id="btn-physics" class="ghost" title="冻结/恢复布局以便自由排列节点">❄ 冻结</button>
             </div>
-            <button id="btn-clear" class="ghost danger">clear graph</button>
+            <button id="btn-clear" class="ghost danger">清空图谱</button>
           </div>
         </div>
         <div id="graph"></div>
